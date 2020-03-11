@@ -2,6 +2,7 @@ const mysql = require("mysql");
 const inquirer = require("inquirer");
 require("console.table");
 let titleList = [];
+let managerList=[];
 
 const connection = mysql.createConnection({
     host: "localhost",
@@ -60,6 +61,7 @@ LEFT JOIN department on department.id=role.department_id
         console.table(data)
 
     })
+    start();
 }
 
 function viewAllEmployeesByDepartment() {
@@ -72,8 +74,10 @@ LEFT JOIN employee employee2 on employee.manager_id=employee2.id
 LEFT JOIN department on department.id=role.department_id order by department`, function (err, data) {
         console.table(data)
     })
+    start();
 }
 
+//if null dont show, delete id table
 function viewAllEmployeesByManager() {
     connection.query("SELECT manager_id,first_name,last_name FROM employee", function (err, res) {
         if (err) throw (err);
@@ -82,10 +86,11 @@ function viewAllEmployeesByManager() {
 
 }
 
-function addEmployee() {
+// function addEmployee() {
 
-}
+// }
 
+//needs an array of employees then put into "1"
 function removeEmployee() {
     connection.query('DELETE FROM employee WHERE employee_id = 1', (err, result) => {
         if (err) throw err;
@@ -107,13 +112,35 @@ function updateEmployeeManager() {
 
 }
 // ADD EMPLOYEE////////////////////////
-function addEmployee() {
-    let managerList=[];
-    roleOption().then(function (titles) {
-        titleList = titles.map(role => role.Title);
 
-        managerOption().then(function (managers) {
-            managerList = managers.map(manager => manager.manager);
+function managerOption(){
+    return new Promise((resolve,reject)=>{
+        connection.query("SELECT * FROM employee WHERE manager_id IS NOT NULL", function(err,data){
+            if (err) throw err;
+            resolve(data);
+        });
+    });
+}
+
+function roleOption(){
+    return new Promise((resolve,reject)=>{
+        connection.query("SELECT * FROM role", function(err,data){
+            if (err) throw err;
+            resolve(data);
+        });
+    })
+}
+
+function addEmployee() {
+   
+    roleOption().then(function (titles) {
+        titleList = titles.map(role => role.title);
+
+        console.log(titles);
+
+        managerOption().then(function (manager) {
+            //console.log(manager);
+            managerList = manager.map(item => item.first_name + " " + item.last_name);
 
             inquirer.prompt([{
                 name: "firstName",
@@ -130,7 +157,7 @@ function addEmployee() {
                 name: "role",
                 type: "list",
                 message: "What is the employee's role?",
-                choices: "titleList"
+                choices: titleList
             },
             {
                 name: "manager",
@@ -139,7 +166,11 @@ function addEmployee() {
                 choices: managerList
             }])
                 .then(function (input) {
-                    connection.query(`INSERT INTO employee(first_name, last_name, role_id,manager_id) VALUES ("${input.firstName}", "${input.lastName}", "${input.role}", "${input.manager}")`,
+
+                    const mySeelectedRole = titles.find(item => item.title === input.role);
+                    const mySelectedManager = manager.find(item => (item.first_name + " " + item.last_name) === input.manager);
+                    console.log(mySelectedManager.manager_id)
+                    connection.query(`INSERT INTO employee(first_name, last_name, role_id,manager_id) VALUES ("${input.firstName}", "${input.lastName}", ${mySeelectedRole.id}, "${mySelectedManager.id}")`,
                     function (err,res){
                         if (err) throw err;
                     }
