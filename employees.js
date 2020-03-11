@@ -24,7 +24,7 @@ function start() {
             name: "options",
             type: "list",
             message: "What would you like to do?",
-            choices: ["View All Employees", "View All Employees by Department", "View All Employees by Manager",
+            choices: ["View All Employees", "View All Employees by Department", "View All Roles","View All Employees by Manager", 
                 "Add Employee", "Remove Employee", "Update Employee Role", "Update Employee Manager"]
         })
         //need a then function and else if/else
@@ -34,6 +34,8 @@ function start() {
                 viewAllEmployee();
             } else if (answer.options === "View All Employees by Department") {
                 viewAllEmployeesByDepartment();
+            }else if (answer.options === "View All Roles") {
+                viewAllRoles();
             } else if (answer.options === "View All Employees by Manager") {
                 viewAllEmployeesByManager();
             } else if (answer.options === "Add Employee") {
@@ -48,7 +50,7 @@ function start() {
 
         });
 }
-//wtf
+//VIEW EMPLOYEES////////////////////////////////////////////////////////////////////////////////////
 function viewAllEmployee() {
     connection.query(`SELECT employee.id,employee.first_name,employee.last_name 
 ,role.title,role.salary ,department.name department,
@@ -63,7 +65,7 @@ LEFT JOIN department on department.id=role.department_id
     })
     start();
 }
-
+//VIEW EMPLOYEE BY DEPT///////////////////////////////////////////////////////////////////////////
 function viewAllEmployeesByDepartment() {
     connection.query(`SELECT employee.id,employee.first_name,employee.last_name 
 ,role.title,role.salary ,department.name department,
@@ -77,7 +79,16 @@ LEFT JOIN department on department.id=role.department_id order by department`, f
     start();
 }
 
-//if null dont show, delete id table
+//VIEW ROLES///////////////////////////////////////////////////////////
+function viewAllRoles(){
+connection.query("SELECT title FROM role", function(err,res){
+    if (err) throw err;
+    console.table(res);
+    start();
+})
+}
+
+//VIEW EMPLOYEE BY MANAGER///////////////////////////////////////////////////////////////////////
 function viewAllEmployeesByManager() {
     connection.query("SELECT manager_id,first_name,last_name FROM employee", function (err, res) {
         if (err) throw (err);
@@ -86,13 +97,10 @@ function viewAllEmployeesByManager() {
 
 }
 
-// function addEmployee() {
-
-// }
 
 //needs an array of employees then put into "1"
 function removeEmployee() {
-    connection.query('DELETE FROM employee WHERE employee_id = 1', (err, result) => {
+    connection.query('DELETE FROM employee WHERE  = 1', (err, result) => {
         if (err) throw err;
 
         console.log(`Deleted ${result.affectedRows} row(s)`);
@@ -102,16 +110,16 @@ function removeEmployee() {
     //connection.query("SELECT * FROM employee WHERE employee_id")
     //}
 }
-// "UPDATE role SET new role
+// "UPDATE role SET new role/////////////////////////////////////////////////////
 function updateEmployeeRole() {
     connection.query("UPDATE role_id SET title = '' WHERE id = 2");
 
 }
-// "UPDATE employee SET new employee
+// "UPDATE employee MANAGER/////////////////////////////////////////////////////////
 function updateEmployeeManager() {
 
 }
-// ADD EMPLOYEE////////////////////////
+// ADD EMPLOYEE////////////////////////////////////////////////////////////////////////
 
 function managerOption(){
     return new Promise((resolve,reject)=>{
@@ -174,7 +182,10 @@ function addEmployee() {
                     function (err,res){
                         if (err) throw err;
                     }
+                    
                     );
+                    start();
+
                 });
         });
     });
