@@ -4,7 +4,7 @@
 https://github.com/tabby-lab/Employee_Tracker
 
 ## Description
-This app uses node.js and mysql to ask a user questions about an employee to create or update information.
+This app uses node.js and mysql to ask a user questions about an employee to create or update information..
 ## Installation
 npm i
 
