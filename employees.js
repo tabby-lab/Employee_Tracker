@@ -198,38 +198,39 @@ function addRole(){
 
 //UPDATE EMPLOYEE ROLE/////////////////////////////////////////////
 function employeeOption(){
-    return new Promise((resolve,reject),function(){
-        connection.query(`SELECT first_name, last_name, FROM employee`, function(err,data){
+    return new Promise((resolve,reject) => {
+        connection.query(`SELECT first_name, last_name FROM employee`, function(err,data){
             if (err) throw err;
-            console.log(data);
+            // console.log(data);
             resolve(data);
         });
     });
 }
 
 function updateEmployeeRole(){
+    console.log("updateemployee")
     let employeeList = [];
 employeeOption().then(function(employees){
 employeeList = employees.map(employee => employee.first_name)
 
-roleChoice().then(function(titles){
+roleOption().then(function(titles){
     titleList=titles.map(role=>role.title);
 
     inquirer.prompt([{
         name:"newEmployee",
-        type:"type",
+        type:"list",
         message:"Which employee would you like to update?",
-        choices:"employeeList"
+        choices:employeeList
     },
     {
         name:"newTitle",
-        type:"input",
+        type:"list",
         message:"What is the employee's new title?",
-        choices:"titleList"
+        choices:titleList
     }
 
     ]).then(function(input){
-        connection.query(`INSERT INTO role(title) VALUE("${input.updateTitle}")`,function (err,res){
+        connection.query(`INSERT INTO role(title) VALUES("${input.newTitle}")`,function (err,res){
             if (err) throw err;
             console.table(viewAllEmployee());
         })
